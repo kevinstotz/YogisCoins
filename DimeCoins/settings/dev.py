@@ -1,3 +1,6 @@
+COIN_IP_ADDRESS = "127.0.0.1"
+COIN_HOSTNAME = 'coin.dime.yogishouse.com'
+COIN_PORT = 10007
 
 WEBSITE_IP_ADDRESS = "127.0.0.1"
 WEBSITE_HOSTNAME = 'www.dime.yogishouse.com'
@@ -24,7 +27,16 @@ DATABASES = {
     'default': {
         'NAME' : "dimecoins-dev",
         'ENGINE': 'django.db.backends.mysql',
-        'HOST': 'dev.cdt994n5tnkz.us-west-2.rds.amazonaws.com',
+        'HOST': 'localhost',
+        'PORT': '3306',
+        'OPTIONS': {
+            'read_default_file': join('C:/', 'ProgramData/', 'MySQL', 'MySQL Server 5.7/', 'my.ini'),
+        },
+    },
+    'dimeAPI': {
+        'NAME': "dimeapi-dev",
+        'ENGINE': 'django.db.backends.mysql',
+        'HOST': 'localhost',
         'PORT': '3306',
         'OPTIONS': {
             'read_default_file': join('C:/', 'ProgramData/', 'MySQL', 'MySQL Server 5.7/', 'my.ini'),
