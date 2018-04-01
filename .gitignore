@@ -14,3 +14,5 @@ local.py
 
 ;;directories to ignore
 .idea/
+migrations/
+DimeCoins/migrations/
