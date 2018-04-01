@@ -40,3 +40,4 @@ from . import coins2450
 from . import coins2520
 from . import coins2590
 from . import coins2660
+
