@@ -106,7 +106,7 @@ class Command(BaseCommand):
             fund.save(using='DimeAPI')
             logger.info("Created Fund: {0}".format(fund_name))
 
-        while start_date < datetime.utcnow().date():
+        while start_date <= datetime.utcnow().date():
 
             try:
                 fund_rebalance_date_model = apps.get_model(app_label='DimeAPI', model_name='fundrebalancedate')
