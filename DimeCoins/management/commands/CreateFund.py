@@ -6,6 +6,12 @@ from DimeCoins.models.base import TopCoins, Xchange, Currency
 from datetime import datetime
 import calendar
 from dateutil.relativedelta import relativedelta
+import logging
+
+
+logging.basicConfig(level=logging.DEBUG,
+                    format='%(asctime)s (%(threadName)-2s) %(message)s',)
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -19,7 +25,7 @@ class Command(BaseCommand):
         parser.add_argument('--frequency', dest='rebalance_frequency', required=False,
                             help='Rebalance Frequency 1 5 7 30 365', type=int)
         parser.add_argument('--value', dest='value_of_fund', required=False, help="Inital value of Fund", type=int)
-        parser.add_argument('--start', dest='start_date', required=False, help='Fund Start Date', type=str)
+        parser.add_argument('--start', dest='start_date', required=False, help='Fund Start Date. Default: 12 months ago', type=str)
         parser.add_argument('--period', dest='rebalance_period', required=False,
                             help='Rebalance period {"DAY", "WEEK", "MONTH", "QUARTER", "YEAR"}', type=str)
         parser.add_argument('--name', dest='fund_name', required=True, help="Name of Fund", type=str)
@@ -43,18 +49,17 @@ class Command(BaseCommand):
             try:
                 rebalance_period =  fund_period_model.objects.using('DimeAPI').get(period=options['rebalance_period'])
             except Exception as error:
-                print("Period should be: DAY, WEEK, QUARTER, MONTH, YEAR")
+                logger.error("Period:{0} should be: DAY, WEEK, QUARTER, MONTH, YEAR: {1}".format(options['rebalance_period'], error))
                 return
 
         if options['start_date']:
             try:
                 start_date = datetime.strptime(options['start_date'], '%Y-%m-%d').date()
             except Exception as error:
-                print("Invalid Date")
+                logger.error("Invalid Date:{0} :{1}".format(options['start_date'], error))
                 return
         else:
-            start_date = datetime.utcnow() + relativedelta(years=-1)
-            start_date = start_date.date()
+            start_date = datetime.utcnow().date() + relativedelta(years=-1)
         self.createFund(fund_name, number_of_currencies, start_date, rebalance_period, rebalance_frequency, value_of_fund)
 
     def createFund(self, fund_name, number_of_currencies, start_date, rebalance_period, rebalance_frequency, value_of_fund):
@@ -63,35 +68,30 @@ class Command(BaseCommand):
         try:
             fund_model = apps.get_model(app_label='DimeAPI', model_name='Fund')
         except Exception as error:
-            print(error)
-            print("failed getting fund")
+            logger.error("Failed getting fund model: {0} : {1}".format('Fund', error))
 
         try:
             fund = fund_model.objects.using('DimeAPI').get(name=fund_name)
-            print("fund with that name exists: " + fund.name)
-            print("Continuing")
+            logger.info("fund with that name exists: {0}.  Continuing".format(fund.name))
         except ObjectDoesNotExist as error:
-            fund = fund_model()
-            fund.name = fund_name
+            fund = fund_model(name=fund_name)
             fund.save(using='DimeAPI')
-            print("Created Fund.")
+            logger.info("Created Fund: {0}".format(fund_name))
 
         fund_rebalance_date_model = ""
         while start_date < datetime.utcnow().date():
 
             try:
                 fund_rebalance_date_model = apps.get_model(app_label='DimeAPI', model_name='fundrebalancedate')
-
             except Exception as error:
-                print(error)
-                print("failed getting fund Rebalance Date Model")
+                logger.error("Failed getting fund Rebalance Date Model: {0}: {1}".format('fundrebalancedate', error))
+                return
 
             try:
                 fund_rebalance_date = fund_rebalance_date_model.objects.using('DimeAPI').get(start_date=start_date, fund=fund)
-                print("Start Date {0} Exists for fund {1}: Continuing".format(fund_rebalance_date.start_date, fund.name))
+                logger.info("Start Date {0} Exists for fund {1}: Continuing".format(fund_rebalance_date.start_date, fund.name))
 
             except ObjectDoesNotExist as error:
-                print(error)
                 fund_rebalance_date = fund_rebalance_date_model()
                 fund_rebalance_date.start_date = start_date
                 if rebalance_period.pk == FUND_PERIOD['DAY']:
@@ -111,7 +111,7 @@ class Command(BaseCommand):
                 fund_rebalance_date.fund_id = fund.pk
                 fund_rebalance_date.save(using='DimeAPI')
 
-                print("Created Rebalance Entry")
+                logger.info("Created Rebalance Entry")
 
             try:
                 top_currencies = TopCoins.objects.filter(time=int(calendar.timegm(start_date.timetuple()))).filter(
@@ -119,8 +119,7 @@ class Command(BaseCommand):
                 if len(top_currencies) != number_of_currencies:
                     raise (Exception)
             except Exception as error:
-                print("Failed getting 10 top coins.  exiting: " + str(len(top_currencies)))
-                print(error)
+                logger.error("Failed getting {0} top coins.  Received: {1} : error:{2} ".format(number_of_currencies, str(len(top_currencies)), error))
                 return
 
             market_cap_sum = 0
@@ -141,21 +140,17 @@ class Command(BaseCommand):
                             end_currency = currency_model.objects.get(xchange=xchange, time=int(calendar.timegm(fund_rebalance_date.end_date.timetuple())))
                         start_currency = currency_model.objects.get(xchange=xchange, time=int(calendar.timegm(fund_rebalance_date.start_date.timetuple())))
                     except ObjectDoesNotExist as error:
-                        print(error)
-                        print("End Date :{0}".format(int(calendar.timegm(fund_rebalance_date.end_date.timetuple()))))
-                        print("Failed getting Currency: {0}".format(top_currency.pk))
+                        logger.error("Failed getting Currency: {0}: End Date:{1}: error:{2}".format(top_currency.pk, int(calendar.timegm(fund_rebalance_date.end_date.timetuple())), error))
                         return
                     except Exception as error:
-                        print("symbol: {0}: time: {1}".format(top_currency.symbol), calendar.timegm(
-                            fund_rebalance_date.end_date.timetuple()))
-                        print(error)
+                        logger.error("Symbol: {0}: time: {1} error:{2}".format(top_currency.symbol, calendar.timegm(
+                            fund_rebalance_date.end_date.timetuple()), error))
                         return
 
                     try:
                         fund_currency_model = apps.get_model(app_label='DimeAPI', model_name='FundCurrency')
                     except Exception as error:
-                        print(error)
-                        print("failed getting fund Currency Model")
+                        logger.error("Failed getting fund Currency Model:{0} error: {1}".format('FundCurrency', error))
 
                     if index == 0:
                         market_cap_sum = market_cap_sum + start_currency.market_cap
@@ -163,14 +158,12 @@ class Command(BaseCommand):
                     else:
                         try:
                             fund_currency = fund_currency_model.objects.using('DimeAPI').get(
-                                rebalance=fund_rebalance_date, fund=fund, currency_id=top_currency.pk)
-                            print("Found fund {0} with rebalance start date: {1}".format(fund.name,
+                                rebalance=fund_rebalance_date, fund=fund, currency__pk=top_currency.pk)
+                            logger.info("Found fund {0} with rebalance start date: {1}. Updating results".format(fund.name,
                                                                                          fund_rebalance_date.start_date))
-                            print("Will update results...continuing")
                         except ObjectDoesNotExist as error:
                             fund_currency = fund_currency_model()
-                            print(error)
-                            print("Creating currency id:{0}, rebalance Date:{0}".format(top_currency.pk, fund_rebalance_date.pk))
+                            logger.info("Creating currency id:{0}, rebalance Date:{0}".format(top_currency.pk, fund_rebalance_date.pk))
                         self.addCurrency(start_currency, end_currency, fund_currency, fund_rebalance_date, fund, rank, level, market_cap_sum, top_currency)
                         rank = rank + 1
 
@@ -194,16 +187,16 @@ class Command(BaseCommand):
             self.rebalance_price[fund_currency.pk] = fund_currency.end_price
             self.level = self.level + fund_currency.end_value
         except Exception as error:
-            print(error)
-            print("level: {0}".format(level))
-            print("top_currency pk: {0}".format(top_currency.pk))
-            print("start_currency open: {0}".format(start_currency.open))
-            print("start_currency market_cap: {0}".format(start_currency.market_cap))
-            print(" percent: {0}".format(start_currency.market_cap / market_cap_sum * 100.0))
-            print("amount: {0}".format((fund_currency.percent / 100.0 * level) / start_currency.open))
-            print("value: {0}".format(start_currency.open * fund_currency.amount))
-            print("rebalance date: {0}".format(fund_rebalance_date))
-            print("close price: {0}".format(end_currency.close))
-            print("end value: {0}".format(end_currency.close * fund_currency.amount))
-            print("rank: {0}".format(rank))
-            print("fund: {0}".format(fund.name))
+            logger.error(error)
+            logger.error("level: {0}".format(level))
+            logger.error("top_currency pk: {0}".format(top_currency.pk))
+            logger.error("start_currency open: {0}".format(start_currency.open))
+            logger.error("start_currency market_cap: {0}".format(start_currency.market_cap))
+            logger.error("percent: {0}".format(start_currency.market_cap / market_cap_sum * 100.0))
+            logger.error("amount: {0}".format((fund_currency.percent / 100.0 * level) / start_currency.open))
+            logger.error("value: {0}".format(start_currency.open * fund_currency.amount))
+            logger.error("rebalance date: {0}".format(fund_rebalance_date))
+            logger.error("close price: {0}".format(end_currency.close))
+            logger.error("end value: {0}".format(end_currency.close * fund_currency.amount))
+            logger.error("rank: {0}".format(rank))
+            logger.error("fund: {0}".format(fund.name))
