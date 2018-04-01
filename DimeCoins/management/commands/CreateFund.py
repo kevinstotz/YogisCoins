@@ -171,7 +171,7 @@ class Command(BaseCommand):
     def addCurrency(self, start_currency, end_currency, fund_currency, fund_rebalance_date, fund, rank, level, market_cap_sum, top_currency):
         try:
             fund_currency.level = level
-            fund_currency.currency_id = top_currency.pk
+            fund_currency.currency = top_currency.pk
             fund_currency.rebalance_price = start_currency.open
             fund_currency.market_cap = start_currency.market_cap
             fund_currency.percent = start_currency.market_cap / market_cap_sum * 100.0
