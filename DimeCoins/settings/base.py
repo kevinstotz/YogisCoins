@@ -211,7 +211,7 @@ CORS_ALLOW_METHODS = (
 
 DATABASES = {
     'default': {
-        'NAME': 'dimeapi-dev',
+        'NAME': 'YogisCoins',
         'ENGINE': 'django.db.backends.mysql',
         'HOST': 'dev.cdt994n5tnkz.us-west-2.rds.amazonaws.com',
         'PORT': 3306,
