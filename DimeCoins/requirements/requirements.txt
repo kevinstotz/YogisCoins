@@ -15,7 +15,7 @@ djangorestframework-jwt==1.11.0
 djangorestframework-oauth==1.1.0
 enum34==1.1.6
 krakenex==2.0.0
-ptyhon-dateutil==2.7.2
+python-dateutil==2.7.2
 pytz==2017.3
 requests==2.18.4
 style==1.1.0
