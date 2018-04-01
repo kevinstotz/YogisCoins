@@ -20,16 +20,42 @@ class Command(BaseCommand):
     level = 0
 
     def add_arguments(self, parser):
-        parser.add_argument('--coins', dest='specific_coins', nargs='+', required=False,
-                            help='Specific Coins to include', type=int)
-        parser.add_argument('--frequency', dest='rebalance_frequency', required=False,
-                            help='Rebalance Frequency 1 5 7 30 365', type=int)
-        parser.add_argument('--value', dest='value_of_fund', required=False, help="Inital value of Fund", type=int)
-        parser.add_argument('--start', dest='start_date', required=False, help='Fund Start Date. Default: 12 months ago', type=str)
-        parser.add_argument('--period', dest='rebalance_period', required=False,
-                            help='Rebalance period {"DAY", "WEEK", "MONTH", "QUARTER", "YEAR"}', type=str)
-        parser.add_argument('--name', dest='fund_name', required=True, help="Name of Fund", type=str)
-        parser.add_argument('--number', dest='number_of_currencies', required=True, help="Number of Coins", type=int)
+        parser.add_argument('--coins',
+                            dest='specific_coins',
+                            nargs='+',
+                            required=False,
+                            help='Specific Coins to include',
+                            type=int)
+        parser.add_argument('--frequency',
+                            dest='rebalance_frequency',
+                            required=False,
+                            help='Rebalance Frequency 1 5 7 30 365',
+                            type=int)
+        parser.add_argument('--value',
+                            dest='value_of_fund',
+                            required=False,
+                            help="Inital value of Fund",
+                            type=int)
+        parser.add_argument('--start',
+                            dest='start_date',
+                            required=False,
+                            help='Fund Start Date. Default: 12 months ago',
+                            type=str)
+        parser.add_argument('--period',
+                            dest='rebalance_period',
+                            required=False,
+                            help='Rebalance period {"DAY", "WEEK", "MONTH", "QUARTER", "YEAR"}',
+                            type=str)
+        parser.add_argument('--name',
+                            dest='fund_name',
+                            required=True,
+                            help="Name of Fund",
+                            type=str)
+        parser.add_argument('--number',
+                            dest='number_of_currencies',
+                            required=True,
+                            help="Number of Coins",
+                            type=int)
 
     def handle(self, *args, **options):
         fund_period_model = apps.get_model(app_label='DimeAPI', model_name='FundPeriod')
@@ -47,7 +73,7 @@ class Command(BaseCommand):
             self.level = value_of_fund
         if options['rebalance_period']:
             try:
-                rebalance_period =  fund_period_model.objects.using('DimeAPI').get(period=options['rebalance_period'])
+                rebalance_period = fund_period_model.objects.using('DimeAPI').get(period=options['rebalance_period'])
             except Exception as error:
                 logger.error("Period:{0} should be: DAY, WEEK, QUARTER, MONTH, YEAR: {1}".format(options['rebalance_period'], error))
                 return
@@ -60,10 +86,12 @@ class Command(BaseCommand):
                 return
         else:
             start_date = datetime.utcnow().date() + relativedelta(years=-1)
-        self.createFund(fund_name, number_of_currencies, start_date, rebalance_period, rebalance_frequency, value_of_fund)
+        self.createFund(fund_name, number_of_currencies, start_date, rebalance_period, rebalance_frequency)
 
-    def createFund(self, fund_name, number_of_currencies, start_date, rebalance_period, rebalance_frequency, value_of_fund):
-        fund = {}
+    def createFund(self, fund_name, number_of_currencies, start_date, rebalance_period, rebalance_frequency):
+        fund = None
+        fund_rebalance_date_model = None
+        fund_model = None
         xchange = Xchange.objects.get(pk=XCHANGE['COIN_MARKET_CAP'])
         try:
             fund_model = apps.get_model(app_label='DimeAPI', model_name='Fund')
@@ -73,12 +101,11 @@ class Command(BaseCommand):
         try:
             fund = fund_model.objects.using('DimeAPI').get(name=fund_name)
             logger.info("fund with that name exists: {0}.  Continuing".format(fund.name))
-        except ObjectDoesNotExist as error:
+        except ObjectDoesNotExist:
             fund = fund_model(name=fund_name)
             fund.save(using='DimeAPI')
             logger.info("Created Fund: {0}".format(fund_name))
 
-        fund_rebalance_date_model = ""
         while start_date < datetime.utcnow().date():
 
             try:
@@ -91,7 +118,7 @@ class Command(BaseCommand):
                 fund_rebalance_date = fund_rebalance_date_model.objects.using('DimeAPI').get(start_date=start_date, fund=fund)
                 logger.info("Start Date {0} Exists for fund {1}: Continuing".format(fund_rebalance_date.start_date, fund.name))
 
-            except ObjectDoesNotExist as error:
+            except ObjectDoesNotExist:
                 fund_rebalance_date = fund_rebalance_date_model()
                 fund_rebalance_date.start_date = start_date
                 if rebalance_period.pk == FUND_PERIOD['DAY']:
@@ -117,7 +144,7 @@ class Command(BaseCommand):
                 top_currencies = TopCoins.objects.filter(time=int(calendar.timegm(start_date.timetuple()))).filter(
                     xchange=xchange).order_by('-market_cap')[:number_of_currencies]
                 if len(top_currencies) != number_of_currencies:
-                    raise (Exception)
+                    raise Exception
             except Exception as error:
                 logger.error("Failed getting {0} top coins.  Received: {1} : error:{2} ".format(number_of_currencies, str(len(top_currencies)), error))
                 return
@@ -125,14 +152,14 @@ class Command(BaseCommand):
             market_cap_sum = 0
             level = self.level
             self.level = 0
-            for index in range(0,2):
+            for index in range(0, 2):
                 rank = 1
 
                 for top_currency in top_currencies:
                     try:
                         top_currency = Currency.objects.get(pk=top_currency.currency.pk)
                         currency_model = apps.get_model("DimeCoins", str(top_currency.symbol).lower())
-                        if fund_rebalance_date.end_date >  datetime.utcnow().date():
+                        if fund_rebalance_date.end_date > datetime.utcnow().date():
                             end_d = datetime.utcnow().date() + relativedelta(days=-1)
                             end_currency = currency_model.objects.get(xchange=xchange, time=int(
                                 calendar.timegm(end_d.timetuple())))
@@ -159,8 +186,8 @@ class Command(BaseCommand):
                             fund_currency = fund_currency_model.objects.using('DimeAPI').get(
                                 rebalance=fund_rebalance_date, fund=fund, currency=top_currency.pk)
                             logger.info("Found fund {0} with rebalance start date: {1}. Updating results".format(fund.name,
-                                                                                         fund_rebalance_date.start_date))
-                        except ObjectDoesNotExist as error:
+                                                                                                                 fund_rebalance_date.start_date))
+                        except ObjectDoesNotExist:
                             fund_currency = fund_currency_model()
                             logger.info("Creating currency id:{0}, rebalance Date:{0}".format(top_currency.pk, fund_rebalance_date.pk))
                         self.addCurrency(start_currency, end_currency, fund_currency, fund_rebalance_date, fund, rank, level, market_cap_sum, top_currency)
