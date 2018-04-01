@@ -99,7 +99,10 @@ class Command(BaseCommand):
                 close_price = 0
 
             try:
-                volume = int(cells[5].text.replace(',', ''))
+                if cells[5].text == '-':
+                    volume = 0
+                else:
+                    volume = int(cells[5].text.replace(',', ''))
             except Exception as error:
                 logger.error("Error getting volume {0}: {1}".format(cells[5], error))
                 volume = 0
