@@ -154,11 +154,10 @@ class Command(BaseCommand):
 
                     if index == 0:
                         market_cap_sum = market_cap_sum + start_currency.market_cap
-
                     else:
                         try:
                             fund_currency = fund_currency_model.objects.using('DimeAPI').get(
-                                rebalance=fund_rebalance_date, fund=fund, currency__pk=top_currency.pk)
+                                rebalance=fund_rebalance_date, fund=fund, currency=top_currency.pk)
                             logger.info("Found fund {0} with rebalance start date: {1}. Updating results".format(fund.name,
                                                                                          fund_rebalance_date.start_date))
                         except ObjectDoesNotExist as error:
