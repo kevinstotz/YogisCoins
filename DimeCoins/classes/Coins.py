@@ -75,7 +75,7 @@ class Coins:
         if inspect.getmembers(self.class_name):
             try:
                 coin_class = eval(self.class_name)
-                logger.info("Evaluated: {0} to class".format(self.class_name))
+                # logger.info("Evaluated: {0} to class".format(self.class_name))
                 return coin_class.objects.get(time=time, xchange=xchange)
             except ObjectDoesNotExist:
                 logger.info("Return empty record for class: {0}".format(self.class_name))

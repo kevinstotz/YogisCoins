@@ -83,7 +83,7 @@ class Command(BaseCommand):
 
             if end_date > datetime.utcnow().date():
                 end_date = datetime.utcnow().date()
-            while start_date < end_date:
+            while start_date <= end_date:
                 start_date_ts = int(calendar.timegm(start_date.timetuple()))
                 try:
                     fundCurrencies = fundCurrency_model.objects.using('DimeAPI').filter(fund=fund, rebalance=fundRebalanceDate ).order_by('-rank')

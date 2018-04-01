@@ -3,7 +3,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from django.core.management.base import BaseCommand
 from DimeCoins.settings.base import XCHANGE, FUND_PERIOD
 from DimeCoins.models.base import TopCoins, Xchange, Currency
-from datetime import datetime, timedelta, date
+from datetime import datetime
 import calendar
 from dateutil.relativedelta import relativedelta
 
@@ -174,16 +174,7 @@ class Command(BaseCommand):
                         self.addCurrency(start_currency, end_currency, fund_currency, fund_rebalance_date, fund, rank, level, market_cap_sum, top_currency)
                         rank = rank + 1
 
-            if rebalance_period.pk == FUND_PERIOD['DAY']:
-                start_date = start_date + relativedelta(days=+rebalance_frequency)
-            if rebalance_period.pk == FUND_PERIOD['WEEK']:
-                start_date = start_date + relativedelta(weeks=+rebalance_frequency)
-            if rebalance_period.pk == FUND_PERIOD['MONTH']:
-                start_date = start_date + relativedelta(months=+rebalance_frequency)
-            if rebalance_period.pk == FUND_PERIOD['QUARTER']:
-                start_date = start_date + relativedelta(months=+(rebalance_frequency * 3))
-            if rebalance_period.pk == FUND_PERIOD['YEAR']:
-                start_date = start_date + relativedelta(years=+rebalance_frequency)
+            start_date = fund_rebalance_date.end_date + relativedelta(days=+1)
 
     def addCurrency(self, start_currency, end_currency, fund_currency, fund_rebalance_date, fund, rank, level, market_cap_sum, top_currency):
         try:
