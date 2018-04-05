@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
         now = datetime.datetime.now()
         end_date = start_date = now.date()
-        start_date = start_date - timedelta(days=2160)
+        start_date = start_date - timedelta(days=10)
         if options['currency_symbol']:
             currencies = Currency.objects.filter(active=0, symbol=options['currency_symbol'])
         else:
@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
         start_date = now.replace(year=2018, month=3, day=28, second=0, minute=0, hour=0)
         start_date = start_date - timedelta(days=0)
-        end_date = start_date - timedelta(weeks=300)
+        end_date = start_date - timedelta(weeks=5)
 
         while end_date < start_date:
             self.parse(start_date)
@@ -73,6 +73,7 @@ class Command(BaseCommand):
             except Exception as error:
                 logger.error("Error getting timestamp: {0}: {1}".format(cells[0], error))
                 timestamp = 0
+                continue
 
             try:
                 open_price = float(cells[1].text.strip())

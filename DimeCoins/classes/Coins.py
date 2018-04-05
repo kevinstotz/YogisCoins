@@ -154,8 +154,8 @@ class Coins:
             file_object.write("\nclass {0}(Coin):\n".format(self.class_name))
             file_object.write("\tpass\n\n")
             file_object.close()
-            call_command('makemigrations DimeCoins')
-            call_command('migrate')
+            call_command('makemigrations', 'DimeCoins')
+            call_command('migrate', 'DimeCoins')
             logger.info("Class Created be sure to migrate: {0}".format(self.class_name))
             return None
         except Exception as error:
