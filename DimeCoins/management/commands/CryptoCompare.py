@@ -1,6 +1,6 @@
 from DimeCoins.models.base import Xchange, Currency
 from DimeCoins.settings.base import XCHANGE
-from DimeCoins.classes import Coins, SymbolName
+from DimeCoins.classes import Coins
 from django.core.exceptions import ObjectDoesNotExist
 import calendar
 from django.core.management.base import BaseCommand
@@ -57,7 +57,7 @@ class Command(BaseCommand):
                     for price in prices:
                         if prices[price] == 'Error':
                             break
-                        coins = Coins.Coins()
+                        coins = Coins.Coins(currency.symbol)
                         coin = coins.get_coin_type(symbol=currency.symbol.replace('*', ''), time=start_date_ts, exchange=self.xchange)
                         coin.time = start_date_ts
                         coin.close = float(prices[price]['USD'])
