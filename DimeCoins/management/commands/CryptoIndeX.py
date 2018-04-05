@@ -20,12 +20,12 @@ class Command(BaseCommand):
         prices = self.getPrice(self.symbol)
         if prices == 0:
             return 0
-        coins = Coins.Coins()
+        coins = Coins.Coins(self.symbol)
         currency = Currency.objects.get(symbol=self.symbol)
         for price in prices:
             utc_dt = datetime.strptime(price['date'], '%Y-%M-%d')
             timestamp = (utc_dt - datetime(1970, 1, 1)).total_seconds()
-            coin = coins.get_coin_type(symbol=self.symbol, time=int(timestamp), exchange=self.xchange)
+            coin = coins.getRecord(time=int(timestamp), xchange=self.xchange)
             coin.time = int(timestamp)
             coin.close = float(price['price'])
             coin.xchange = self.xchange
