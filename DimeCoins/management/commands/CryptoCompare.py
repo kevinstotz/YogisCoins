@@ -8,7 +8,7 @@ from datetime import datetime, timedelta
 import logging
 import requests
 
-
+logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s (%(threadName)-2s) %(message)s',
                     )
@@ -24,30 +24,20 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         xchange_coins = self.getCoins()
-
         for xchange_coin in xchange_coins:
-
+            if xchange_coin is None:
+                continue
+            coins = Coins.Coins(xchange_coins[xchange_coin]['Symbol'])
             try:
                 currency = Currency.objects.get(symbol=xchange_coins[xchange_coin]['Symbol'])
-                print(xchange_coins[xchange_coin]['Symbol'] + " exists")
+                logger.info("{0} exists".format(xchange_coins[xchange_coin]['Symbol']))
             except ObjectDoesNotExist as error:
-                continue
-                print(xchange_coins[xchange_coin]['Symbol'] + " does not exist in our currency list..adding" + error)
-
-                currency = Currency()
-                symbol = SymbolName.SymbolName(xchange_coins[xchange_coin]['Symbol'])
-                currency.symbol = symbol.parse_symbol()
-                try:
-                    currency.save()
-                    currency = Currency.objects.get(symbol=symbol)
-                    print("added")
-                except:
-                    print("failed adding {0}".format(xchange_coins[xchange_coin]['Symbol']))
-                    continue
+                logger.info("{0} does not exist in our currency list..Adding".format(xchange_coins[xchange_coin]['Symbol'], error))
+                coins.createClass()
 
             now = datetime.now()
             start_date = now.replace(second=0, minute=0, hour=0)
-            end_date = start_date - timedelta(days=7)
+            end_date = start_date - timedelta(days=1500)
 
             while end_date < start_date:
                 start_date_ts = calendar.timegm(start_date.timetuple())
@@ -57,8 +47,7 @@ class Command(BaseCommand):
                     for price in prices:
                         if prices[price] == 'Error':
                             break
-                        coins = Coins.Coins(currency.symbol)
-                        coin = coins.get_coin_type(symbol=currency.symbol.replace('*', ''), time=start_date_ts, exchange=self.xchange)
+                        coin = coins.getRecord(time=start_date_ts, xchange=self.xchange)
                         coin.time = start_date_ts
                         coin.close = float(prices[price]['USD'])
                         coin.xchange = self.xchange

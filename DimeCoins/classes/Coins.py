@@ -1,3 +1,4 @@
+import time
 import logging
 import inspect
 from os.path import join
@@ -119,8 +120,9 @@ class Coins:
 
             if idx == (len(symbol) - 1):
                 if char == '*':
+                    print(char)
                     new_class_name = new_class_name + '_STAR'
-                if char == '$':
+                elif char == '$':
                     new_class_name = new_class_name + 'DOLLAR'
                 elif char == '@':
                     new_class_name = new_class_name + '_AT'
@@ -130,7 +132,7 @@ class Coins:
                 
             if char == '*':
                 new_class_name = new_class_name + 'STAR_'
-            if char == '$':
+            elif char == '$':
                 new_class_name = new_class_name + 'DOLLAR_'
             elif char == '@':
                 new_class_name = new_class_name + 'AT_'
@@ -139,7 +141,7 @@ class Coins:
             elif char.encode('ascii').isalpha():
                 new_class_name = new_class_name + char.upper()
             else:
-                pass
+                logger.error("Char {0} was not converted".format(char))
 
         self.class_name = new_class_name.upper()
         return self.class_name
@@ -154,6 +156,7 @@ class Coins:
             file_object.write("\nclass {0}(Coin):\n".format(self.class_name))
             file_object.write("\tpass\n\n")
             file_object.close()
+            call_command('makemigrations', 'DimeCoins')
             call_command('makemigrations', 'DimeCoins')
             call_command('migrate', 'DimeCoins')
             logger.info("Class Created be sure to migrate: {0}".format(self.class_name))

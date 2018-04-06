@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
         now = datetime.datetime.now()
         end_date = start_date = now.date()
-        start_date = start_date - timedelta(days=10)
+        start_date = start_date - timedelta(days=1000)
         if options['currency_symbol']:
             currencies = Currency.objects.filter(active=0, symbol=options['currency_symbol'])
         else:
@@ -42,7 +42,7 @@ class Command(BaseCommand):
 
         start_date = now.replace(year=2018, month=3, day=28, second=0, minute=0, hour=0)
         start_date = start_date - timedelta(days=0)
-        end_date = start_date - timedelta(weeks=5)
+        end_date = start_date - timedelta(weeks=400)
 
         while end_date < start_date:
             self.parse(start_date)
@@ -72,40 +72,36 @@ class Command(BaseCommand):
                 timestamp = datetime.datetime.strptime(cells[0].text.strip(), "%b %d, %Y").date()
             except Exception as error:
                 logger.error("Error getting timestamp: {0}: {1}".format(cells[0], error))
-                timestamp = 0
                 continue
 
             try:
-                open_price = float(cells[1].text.strip())
+                open_price = float(cells[1].text.strip().replace(',', ''))
             except Exception as error:
-                logger.error("Error getting open price:{0}: {1}".format(cells[1], error))
+                logger.info("Error getting open price:{0}: {1}".format(cells[1], error))
                 open_price = 0
 
             try:
-                high = float(cells[2].text.strip())
+                high = float(cells[2].text.strip().replace(',', ''))
             except Exception as error:
-                logger.error("Error getting high price:{0}: {1}".format(cells[2], error))
+                logger.info("Error getting high price:{0}: {1}".format(cells[2], error))
                 high = 0
 
             try:
-                low = float(cells[3].text.strip())
+                low = float(cells[3].text.strip().replace(',', ''))
             except Exception as error:
-                logger.error("Error getting low price: {0}: {1}".format(cells[3], error))
+                logger.info("Error getting low price: {0}: {1}".format(cells[3], error))
                 low = 0
 
             try:
-                close_price = float(cells[4].text.strip())
+                close_price = float(cells[4].text.strip().replace(',', ''))
             except Exception as error:
-                logger.error("Error getting close price:{0}: {1}".format(cells[4], error))
+                logger.info("Error getting close price:{0}: {1}".format(cells[4], error))
                 close_price = 0
 
             try:
-                if cells[5].text == '-':
-                    volume = 0
-                else:
-                    volume = int(cells[5].text.replace(',', ''))
+                volume = int(cells[5].text.replace(',', ''))
             except Exception as error:
-                logger.error("Error getting volume {0}: {1}".format(cells[5], error))
+                logger.info("Error getting volume {0}: {1}".format(cells[5], error))
                 volume = 0
 
             try:
@@ -114,7 +110,7 @@ class Command(BaseCommand):
                 else:
                     market_cap = int(cells[6].text.replace(',', ''))
             except Exception as error:
-                logger.error("Error getting market cap{0}: {1}".format(cells[6], error))
+                logger.info("Error getting market cap{0}: {1}".format(cells[6], error))
                 market_cap = 0
 
             coin = Coins.Coins(currency.symbol)
@@ -175,7 +171,9 @@ class Command(BaseCommand):
                 market_cap = 0
 
             try:
-                price = float(cells[4].a['data-usd'])
+                p = cells[4].a['data-usd']
+                p = p.replace(',', '')
+                price = float(p)
             except Exception as error:
                 print(error)
                 print("Failed Price: {0}".format(price))

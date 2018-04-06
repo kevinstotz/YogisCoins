@@ -20,3 +20,15 @@ class FDZ(Coin):
 class SWH(Coin):
 	pass
 
+
+class BTG_STAR(Coin):
+	pass
+
+
+class CRC_STAR(Coin):
+	pass
+
+
+class KEY_STAR(Coin):
+	pass
+

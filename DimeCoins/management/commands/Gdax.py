@@ -1,5 +1,5 @@
 from DimeCoins.models.base import Xchange, Currency
-from DimeCoins.classes import Coins, SymbolName
+from DimeCoins.classes import Coins
 import requests
 from django.core.management.base import BaseCommand
 from django.core.exceptions import ObjectDoesNotExist
@@ -9,9 +9,11 @@ import logging
 import json
 from time import sleep
 
+logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s (%(threadName)-2s) %(message)s',
                     )
+
 
 
 class Command(BaseCommand):
@@ -27,25 +29,17 @@ class Command(BaseCommand):
         for xchange_coin in xchange_coins:
             if xchange_coin['id'] in ['USD', 'EUR', 'GBP']:
                 continue
-            try:
-                currency = Currency.objects.get(symbol=xchange_coin['id'])
-                print(xchange_coin['id'] + " exists")
-            except ObjectDoesNotExist as error:
-                print(xchange_coin['id'] + " does not exist in our currency list..adding" + error)
-                currency = Currency()
-                symbol = SymbolName.SymbolName(xchange_coin['id'])
-                currency.symbol = symbol.parse_symbol()
-                try:
-                    currency.save()
-                    currency = Currency.objects.get(symbol=symbol)
-                    print("added")
-                except:
-                    print("failed adding {0}".format(xchange_coin['id']))
-                    continue
 
             now = datetime.now()
             start_date = now.replace(second=0, minute=0, hour=0)
-            end_date = start_date - timedelta(days=7)
+            end_date = start_date - timedelta(days=1000)
+            coins = Coins.Coins(xchange_coin['id'])
+            try:
+                currency = Currency.objects.get(symbol=xchange_coin['id'])
+                logger.info("{0} exists".format(xchange_coin['id']))
+            except ObjectDoesNotExist as error:
+                logger.info("{0} does not exist in our currency list..Adding".format(xchange_coin['id'], error))
+                coins.createClass()
 
             while end_date < start_date:
                 sleep(2)
@@ -53,10 +47,10 @@ class Command(BaseCommand):
                                        start_date=self.__date_to_iso8601(date_time=(start_date - timedelta(days=1)).timetuple()),
                                        end_date=self.__date_to_iso8601(date_time=start_date.timetuple()),
                                        granularity=86400)
-                coins = Coins.Coins()
                 if len(prices) > 0:
                     for price in prices:
-                        coin = coins.get_coin_type(symbol=currency.symbol, time=int(price[0]), exchange=self.xchange)
+
+                        coin = coins.getRecord(time=int(price[0]), xchange=self.xchange)
                         coin.time = int(price[0])
                         coin.low = float(price[1])
                         coin.high = float(price[2])

@@ -1,13 +1,13 @@
 from DimeCoins.models.base import Xchange, Currency
-import calendar
 from django.core.management.base import BaseCommand
 import krakenex
+import logging
 from django.core.exceptions import ObjectDoesNotExist
 from DimeCoins.settings.base import XCHANGE
-from datetime import timedelta, datetime
-import logging
-from DimeCoins.classes import Coins, SymbolName
+from DimeCoins.classes import Coins
 
+
+logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s (%(threadName)-2s) %(message)s',
                     )
@@ -31,22 +31,12 @@ class Command(BaseCommand):
             except ObjectDoesNotExist as error:
                 print(xchange_coins[xchange_coin]['altname'] + " does not exist in our currency list..adding")
                 currency = Currency()
-                symbol = SymbolName.SymbolName(xchange_coins[xchange_coin]['altname'])
-                currency.symbol = symbol.parse_symbol()
-                try:
-                    currency.save()
-                    currency = Currency.objects.get(symbol=xchange_coins[xchange_coin]['altname'])
-                    print("added")
-                except:
-                    print("failed adding {0}".format(xchange_coins[xchange_coin]['altname']))
-                    continue
-
 
             prices = self.getPrice(currency.symbol)
             if prices != 0:
                 for price in prices:
-                    coins = Coins.Coins()
-                    coin = coins.get_coin_type(symbol=xchange_coins[xchange_coin]['altname'], time=int(price[0]), exchange=self.xchange)
+                    coins = Coins.Coins(currency.symbol)
+                    coin = coins.getRecord(time=int(price[0]), xchange=self.xchange)
                     coin.time = int(price[0])
                     coin.open = float(price[1])
                     coin.close = float(price[4])
