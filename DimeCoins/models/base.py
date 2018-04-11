@@ -1,6 +1,6 @@
 from __future__ import unicode_literals
 from django.db import models
-from DimeCoins.settings.base import CURRENCY_SYMBOL_LENGTH, CURRENCY_NAME_LENGTH, CURRENCY_NAME_LENGTH, CURRENCY_FULL_NAME_LENGTH
+from DimeCoins.settings.base import CURRENCY_SYMBOL_LENGTH, CURRENCY_NAME_LENGTH, CURRENCY_FULL_NAME_LENGTH
 
 
 class Xchange(models.Model):
@@ -69,7 +69,7 @@ class TopCoins(models.Model):
     objects = models.Manager()
 
     def __str__(self):
-        return '%s' % self.name
+        return '%s' % self.id
 
     class Meta:
         ordering = ('currency',)

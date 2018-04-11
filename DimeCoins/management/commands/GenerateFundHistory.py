@@ -70,7 +70,6 @@ class Command(BaseCommand):
                 logger.error("Failed getting Fund Currency Model: (0}".format(error))
                 return
 
-
             try:
                 fundHistory_model = apps.get_model(app_label='DimeAPI', model_name='FundHistory')
             except Exception as error:
@@ -109,8 +108,8 @@ class Command(BaseCommand):
                                                                                  fund=fund)
                     fundHistory.value = running_total
                     fundHistory.save()
-                    logger.info("Record found for Fund History Instance:{0} exchange:{1}, updating ".format(
-                        start_date_ts, xchange.pk))
+                    logger.info("Record found Fund {0} Symbol:{1} Date:{2} exchange:{3}, updating ".format(
+                        fundCurrency.fund.pk, fundCurrency.currency.symbol, start_date, xchange.pk))
                 except ObjectDoesNotExist:
                     logger.info("No Record for Fund History Instance:{0} exchange:{1}, adding ".format(
                         start_date_ts, xchange.pk))

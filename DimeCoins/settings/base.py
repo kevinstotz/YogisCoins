@@ -1,21 +1,31 @@
 from os.path import join, abspath, dirname, relpath, realpath
+from os import environ
 
 WEBSITE_IP_ADDRESS = ""
 WEBSITE_HOSTNAME = ""
 WEBSITE_PORT = ""
+WEBSITE_HOSTNAME_AND_PORT = ""
+WEBSITE_HOSTNAME_URL = ""
 
 DASHBOARD_IP_ADDRESS = ""
 DASHBOARD_HOSTNAME = ""
 DASHBOARD_PORT = ""
+DASHBOARD_HOSTNAME_AND_PORT = ""
 
 LOCAL_HOST = ""
 LOCAL_HOST_PORT = ""
+LOCAL_HOST_AND_PORT = ""
 
 ENGINE_IP_ADDRESS = ""
 ENGINE_DOMAIN = ""
 ENGINE_HOSTNAME = ""
 ENGINE_PORT = ""
+ENGINE_HOSTNAME_AND_PORT = ""
 
+COIN_HOSTNAME_AND_PORT = ""
+COIN_IP_ADDRESS = ""
+COIN_HOSTNAME = ""
+COIN_PORT = ""
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = abspath(dirname(__name__))  # .../DimeCoins
@@ -23,25 +33,86 @@ PROJECT_DIR = dirname(dirname(abspath(__file__)))  # .../DimeCoins/DimeCons
 SETTINGS_DIR = dirname(realpath(__file__))  # .../DimeCoins/DimeCoins/settings
 PROJECT_NAME = relpath(PROJECT_DIR)  # DimeCoins
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-DJANGO_LOG_LEVEL = DEBUG
 
 SECURE = 'https://'
 UNSECURE = 'http://'
+if 'dev' in environ['DJANGO_SERVER_TYPE'].lower():
+    DEBUG = True
+    DJANGO_LOG_LEVEL = DEBUG
 
-WEBSITE_HOSTNAME_AND_PORT = WEBSITE_HOSTNAME + ":" + str(WEBSITE_PORT)
-WEBSITE_HOSTNAME_URL = UNSECURE + WEBSITE_HOSTNAME + ":" + str(WEBSITE_PORT)
+    WEBSITE_IP_ADDRESS = "127.0.0.1"
+    WEBSITE_HOSTNAME = 'www.dime.yogishouse.com'
+    WEBSITE_PORT = 10004
 
-DASHBOARD_HOSTNAME_AND_PORT = DASHBOARD_HOSTNAME + ":" + str(DASHBOARD_PORT)
-DASHBOARD_HOSTNAME_URL = UNSECURE + DASHBOARD_HOSTNAME + ":" + str(DASHBOARD_PORT)
+    DASHBOARD_IP_ADDRESS = "127.0.0.1"
+    DASHBOARD_HOSTNAME = 'dashboard.dime.yogishouse.com'
+    DASHBOARD_PORT = 10005
 
-LOCAL_HOST_AND_PORT = LOCAL_HOST + str(LOCAL_HOST_PORT)
+    ENGINE_IP_ADDRESS = "127.0.0.1"
+    ENGINE_DOMAIN = 'yogishouse.com'
+    ENGINE_HOSTNAME = 'api.dime' + "." + ENGINE_DOMAIN
+    ENGINE_PORT = 10006
 
-ENGINE_HOSTNAME_AND_PORT = ENGINE_HOSTNAME + ":" + str(ENGINE_PORT)
-ENGINE_HOSTNAME_URL = SECURE + ENGINE_HOSTNAME + ":" + str(ENGINE_PORT)
+    COIN_IP_ADDRESS = "127.0.0.1"
+    COIN_HOSTNAME = 'coin.dime.yogishouse.com'
+    COIN_PORT = 10007
 
-ALLOWED_HOSTS = [ENGINE_HOSTNAME]
+    WEBSITE_HOSTNAME_AND_PORT = WEBSITE_HOSTNAME + ":" + str(WEBSITE_PORT)
+    WEBSITE_HOSTNAME_URL = UNSECURE + WEBSITE_HOSTNAME + ":" + str(WEBSITE_PORT)
+
+    DASHBOARD_HOSTNAME_AND_PORT = DASHBOARD_HOSTNAME + ":" + str(DASHBOARD_PORT)
+    DASHBOARD_HOSTNAME_URL = UNSECURE + DASHBOARD_HOSTNAME + ":" + str(DASHBOARD_PORT)
+
+    LOCAL_HOST = 'localhost'
+    LOCAL_HOST_PORT = 10004
+    LOCAL_HOST_AND_PORT = LOCAL_HOST + str(LOCAL_HOST_PORT)
+
+    ENGINE_HOSTNAME_NO_PORT = UNSECURE + ENGINE_HOSTNAME
+    ENGINE_HOSTNAME_AND_PORT = ENGINE_HOSTNAME + ":" + str(ENGINE_PORT)
+    ENGINE_HOSTNAME_URL = UNSECURE + ENGINE_HOSTNAME + ":" + str(ENGINE_PORT)
+
+    COIN_HOSTNAME_AND_PORT = COIN_HOSTNAME + ":" + str(COIN_PORT)
+    COIN_HOSTNAME_URL = UNSECURE + COIN_HOSTNAME + ":" + str(COIN_PORT)
+
+if 'prod' in environ['DJANGO_SERVER_TYPE'].lower():
+    DEBUG = True
+    DJANGO_LOG_LEVEL = DEBUG
+
+    WEBSITE_IP_ADDRESS = "127.0.0.1"
+    WEBSITE_HOSTNAME = 'www.yogishouse.com'
+    WEBSITE_PORT = 10004
+
+    DASHBOARD_IP_ADDRESS = "127.0.0.1"
+    DASHBOARD_HOSTNAME = 'dashboard.yogishouse.com'
+    DASHBOARD_PORT = 10005
+
+    ENGINE_IP_ADDRESS = "127.0.0.1"
+    ENGINE_DOMAIN = 'yogishouse.com'
+    ENGINE_HOSTNAME = 'api' + "." + ENGINE_DOMAIN
+    ENGINE_PORT = 10006
+
+    COIN_IP_ADDRESS = "127.0.0.1"
+    COIN_HOSTNAME = 'coin.yogishouse.com'
+    COIN_PORT = 10007
+
+    WEBSITE_HOSTNAME_AND_PORT = WEBSITE_HOSTNAME + ":" + str(WEBSITE_PORT)
+    WEBSITE_HOSTNAME_URL = UNSECURE + WEBSITE_HOSTNAME + ":" + str(WEBSITE_PORT)
+
+    DASHBOARD_HOSTNAME_AND_PORT = DASHBOARD_HOSTNAME + ":" + str(DASHBOARD_PORT)
+    DASHBOARD_HOSTNAME_URL = UNSECURE + DASHBOARD_HOSTNAME + ":" + str(DASHBOARD_PORT)
+
+    LOCAL_HOST = 'localhost'
+    LOCAL_HOST_PORT = 10004
+    LOCAL_HOST_AND_PORT = LOCAL_HOST + str(LOCAL_HOST_PORT)
+
+    ENGINE_HOSTNAME_NO_PORT = SECURE + ENGINE_HOSTNAME
+    ENGINE_HOSTNAME_AND_PORT = ENGINE_HOSTNAME + ":" + str(ENGINE_PORT)
+    ENGINE_HOSTNAME_URL = SECURE + ENGINE_HOSTNAME + ":" + str(ENGINE_PORT)
+
+    COIN_HOSTNAME_AND_PORT = COIN_HOSTNAME + ":" + str(COIN_PORT)
+    COIN_HOSTNAME_URL = SECURE + COIN_HOSTNAME + ":" + str(COIN_PORT)
+
+ALLOWED_HOSTS = [ENGINE_HOSTNAME, COIN_HOSTNAME]
 
 # Application definition
 AUTH_USER_MODEL = 'DimeAPI.CustomUser'
@@ -82,6 +153,7 @@ CSRF_USE_SESSIONS = True
 CSRF_COOKIE_DOMAIN = '.' + ENGINE_DOMAIN
 CSRF_TRUSTED_ORIGINS = (
     ENGINE_HOSTNAME,
+    COIN_HOSTNAME,
     WEBSITE_HOSTNAME,
     DASHBOARD_HOSTNAME
 )
@@ -112,6 +184,7 @@ AUTHENTICATION_BACKENDS = (
 INTERNAL_IPS = [
     ENGINE_IP_ADDRESS,
     WEBSITE_IP_ADDRESS,
+    COIN_IP_ADDRESS,
     DASHBOARD_IP_ADDRESS
 ]
 
@@ -175,6 +248,7 @@ LOGGING = {
 
 CORS_ORIGIN_WHITELIST = (
     LOCAL_HOST_AND_PORT,
+    COIN_HOSTNAME_AND_PORT,
     WEBSITE_HOSTNAME_AND_PORT,
     DASHBOARD_HOSTNAME_AND_PORT,
     ENGINE_HOSTNAME_AND_PORT
@@ -225,21 +299,25 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',
     ],
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
     'EXCEPTION_HANDLER': 'rest_framework.views.exception_handler',
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'oauth2_provider.contrib.rest_framework.OAuth2Authentication'
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.BasicAuthentication'
     ],
-    'PAGE_SIZE': 10,
+
     'DEFAULT_PARSER_CLASSES': (
         'rest_framework.parsers.JSONParser',
     ),
-    'DEFAULT_PAGINATION_CLASS': (
-        'rest_framework.pagination.LimitOffsetPagination',
-    )
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE': 20,
+    'PAGINATE_BY': 20,
+    'PAGINATE_BY_PARAM': 'page_size',
+    'MAX_PAGINATE_BY': 100
 }
 
 # 'DEFAULT_FILTER_BACKENDS':  ('rest_framework.filters.DjangoFilterBackend',),
@@ -280,7 +358,6 @@ EMAIL_SERVER = {
 }
 PASSWORD_LENGTH = 20
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.mailtrap.io'
 EMAIL_PORT = 2525
 EMAIL_HOST_USER = 'c8bed2fa6aecd1'
@@ -316,7 +393,6 @@ ADDRESS_LENGTH = 42
 URL_LENGTH = 100
 CURRENCY_NAME_LENGTH = 50
 CURRENCY_SYMBOL_LENGTH = 10
-CURRENCY_NAME_LENGTH = 50
 CURRENCY_FULL_NAME_LENGTH = 100
 ICON_NAME_LENGTH = 30
 

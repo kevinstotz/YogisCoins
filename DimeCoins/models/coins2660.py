@@ -32,3 +32,15 @@ class CRC_STAR(Coin):
 class KEY_STAR(Coin):
 	pass
 
+
+class C(Coin):
+	pass
+
+
+class BERRY(Coin):
+	pass
+
+
+class XTL(Coin):
+	pass
+

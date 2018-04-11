@@ -29,7 +29,7 @@ class Command(BaseCommand):
 
         now = datetime.datetime.now()
         end_date = start_date = now.date()
-        start_date = start_date - timedelta(days=1000)
+        start_date = start_date - timedelta(days=10)
         if options['currency_symbol']:
             currencies = Currency.objects.filter(active=0, symbol=options['currency_symbol'])
         else:
@@ -40,9 +40,9 @@ class Command(BaseCommand):
                 continue
             self.parseHistoricalPage(currency, start_date, end_date)
 
-        start_date = now.replace(year=2018, month=3, day=28, second=0, minute=0, hour=0)
+        start_date = now.replace(year=2018, month=4, day=1, second=0, minute=0, hour=0)
         start_date = start_date - timedelta(days=0)
-        end_date = start_date - timedelta(weeks=400)
+        end_date = start_date - timedelta(weeks=3)
 
         while end_date < start_date:
             self.parse(start_date)
@@ -231,6 +231,12 @@ class Command(BaseCommand):
                     coins = Coins.Coins(coin['symbol'])
                     coins.createClass()
                     currency.class_name = coins.class_name
+                    if currency.name is None:
+                        currency.name = coin['name']
+                    if currency.coin_name is None:
+                        currency.coin_name = coin['name']
+                    if currency.full_name is None:
+                        currency.full_name = coin['name']
                     currency.save()
 
                 except ObjectDoesNotExist as error:

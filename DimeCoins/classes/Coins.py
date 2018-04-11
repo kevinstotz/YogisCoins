@@ -1,9 +1,9 @@
-import time
 import logging
 import inspect
 from os.path import join
 from django.core.management import call_command
 from django.core.exceptions import ObjectDoesNotExist
+from DimeCoins.models.base import Xchange
 from DimeCoins.settings.base import PROJECT_DIR
 from DimeCoins.models.coins0 import *
 from DimeCoins.models.coins70 import *
@@ -71,6 +71,19 @@ class Coins:
             self.class_name = self.createClassName(self.symbol)
         return self.class_name
 
+
+    def getObject(self):
+
+        if inspect.getmembers(self.class_name):
+            try:
+                return eval(self.class_name)
+            except NameError as error:
+                logger.error("Class Name Error: {0}".format(error))
+                return None
+        else:
+            logger.error("No members for class: {0}".format(self.class_name))
+            return None
+
     def getRecord(self, time, xchange):
 
         if inspect.getmembers(self.class_name):
@@ -81,6 +94,23 @@ class Coins:
             except ObjectDoesNotExist:
                 logger.info("Return empty record for class: {0}".format(self.class_name))
                 return eval(self.class_name)()
+            except NameError as error:
+                logger.error("Class Name Error: {0}".format(error))
+                return None
+        else:
+            logger.error("No members for class: {0}".format(self.class_name))
+            return None
+
+    def getLatest(self, xchange: Xchange) -> object:
+
+        if inspect.getmembers(self.class_name):
+            try:
+                coin_class = eval(self.class_name)
+                # logger.info("Evaluated: {0} to class".format(self.class_name))
+                return coin_class.objects.filter(xchange=xchange).order_by('-time').first()
+            except ObjectDoesNotExist:
+                logger.info("Return empty record for class: {0}".format(self.class_name))
+                return None
             except NameError as error:
                 logger.error("Class Name Error: {0}".format(error))
                 return None

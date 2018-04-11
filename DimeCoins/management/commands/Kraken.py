@@ -25,17 +25,18 @@ class Command(BaseCommand):
 
         xchange_coins = self.getCoins()
         for xchange_coin in xchange_coins:
+
+            coins = Coins.Coins(xchange_coins[xchange_coin]['altname'])
             try:
                 currency = Currency.objects.get(symbol=xchange_coins[xchange_coin]['altname'])
-                print(xchange_coins[xchange_coin]['altname'] + " exists")
+                logger.info("{0} exists".format(xchange_coins[xchange_coin]['altname']))
             except ObjectDoesNotExist as error:
-                print(xchange_coins[xchange_coin]['altname'] + " does not exist in our currency list..adding")
-                currency = Currency()
+                logger.info("{0} does not exist in our currency list..Adding".format(xchange_coins[xchange_coin]['altname'], error))
+                coins.createClass()
 
             prices = self.getPrice(currency.symbol)
             if prices != 0:
                 for price in prices:
-                    coins = Coins.Coins(currency.symbol)
                     coin = coins.getRecord(time=int(price[0]), xchange=self.xchange)
                     coin.time = int(price[0])
                     coin.open = float(price[1])
@@ -61,9 +62,3 @@ class Command(BaseCommand):
             return res['result']
         except:
            return 0
-
-    def __date_to_iso8601(self, date_time):
-        return '{year}-{month:02d}-{day:02d}'.format(
-            year=date_time.tm_year,
-            month=date_time.tm_mon,
-            day=date_time.tm_mday)
