@@ -44,3 +44,15 @@ class BERRY(Coin):
 class XTL(Coin):
 	pass
 
+
+class CKUSD(Coin):
+	pass
+
+
+class NCT(Coin):
+	pass
+
+
+class ODE(Coin):
+	pass
+

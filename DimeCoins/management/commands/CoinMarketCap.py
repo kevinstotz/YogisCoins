@@ -22,7 +22,7 @@ class Command(BaseCommand):
         parser.add_argument('--symbol', dest='currency_symbol', required=False, help='Currency Symbol', type=str)
 
     def handle(self, *args, **options):
-        #  instance variable unique to each instance
+        #  instance variable unique to each instance frank whiting x120
 
         if not self.getCoinList():
             return
