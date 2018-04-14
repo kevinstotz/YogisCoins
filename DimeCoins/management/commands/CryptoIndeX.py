@@ -6,16 +6,18 @@ from DimeCoins.settings.base import XCHANGE
 from datetime import datetime
 import logging
 
+
 logging.basicConfig(level=logging.DEBUG,
                     format='%(asctime)s (%(threadName)-2s) %(message)s',
                     )
+
 
 class Command(BaseCommand):
     def handle(self, *args, **options):
 
         self.xchange = Xchange.objects.get(pk=XCHANGE['CRYPTOINDEX'])
         self.comparison_currency = 'USD'
-        self.symbol ='CRIX'
+        self.symbol = 'CRIX'
 
         prices = self.getPrice(self.symbol)
         if prices == 0:
@@ -34,11 +36,11 @@ class Command(BaseCommand):
         return 0
 
     def getPrice(self, currency_symbol, start_date=datetime.utcnow(), end_date=datetime.utcnow(), granularity=86400):
-        headers = {'content-type': 'application/json','user-agent': 'your-own-user-agent/0.0.1'}
+        headers = {'content-type': 'application/json', 'user-agent': 'your-own-user-agent/0.0.1'}
         params = {}
 
         spot_price = requests.get(self.xchange.api_url + 'crix.json', params=params, headers=headers)
         if spot_price.status_code == requests.codes.ok:
             return spot_price.json()
         else:
-            return([])
+            return []

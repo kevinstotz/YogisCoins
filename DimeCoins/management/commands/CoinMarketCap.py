@@ -134,8 +134,7 @@ class Command(BaseCommand):
                                                     xchange=self.xchange,
                                                     time=int(calendar.timegm(timestamp.timetuple())))
                 except ObjectDoesNotExist as error:
-                    print(error)
-                    print("Top Coin does not exist: {0} {1} -> adding it".format(currency.pk, currency.symbol))
+                    logger.error("Top Coin does not exist: {0} {1} -> adding it: error:{2}".format(currency.pk, currency.symbol, error))
                     top_coin = TopCoins()
 
                 top_coin.currency = currency
@@ -145,14 +144,14 @@ class Command(BaseCommand):
                 top_coin.time = int(calendar.timegm(timestamp.timetuple()))
                 top_coin.save()
             else:
-                print("No class: {0} :not adding".format(currency.class_name))
+                logger.error("No class: {0} :not adding".format(currency.class_name))
         return
 
     def parse(self, start_date):
 
         r = requests.get('https://coinmarketcap.com/historical/{0}/'.format(start_date.strftime('%Y%m%d')))
         if r.status_code != 200:
-            print("not found {0}".format(r.url))
+            logger.error("not found {0}".format(r.url))
             return
         soup = BeautifulSoup(r.content, "html.parser")
 
@@ -166,8 +165,7 @@ class Command(BaseCommand):
             try:
                 market_cap = float(market_cap)
             except Exception as error:
-                print(error)
-                print("Failed Market Cap: {0}".format(market_cap))
+                logger.error("Failed Market Cap: {0}: {1}".format(market_cap, error))
                 market_cap = 0
 
             try:
@@ -175,27 +173,25 @@ class Command(BaseCommand):
                 p = p.replace(',', '')
                 price = float(p)
             except Exception as error:
-                print(error)
-                print("Failed Price: {0}".format(price))
+                logger.error("Failed Price: {0}: {1}".format(price, error))
                 price = 0
 
             try:
                 circulating_supply = cells[5].a['data-supply']
             except Exception as error:
-                print("Failed circulating supply: {0}:{1}".format(circulating_supply, error))
+                logger.error("Failed circulating supply: {0}:{1}".format(circulating_supply, error))
                 circulating_supply = cells[5].span['data-supply']
 
             try:
                 circulating_supply = int(float(circulating_supply))
             except Exception as error:
-                print(error)
-                print("Failedcirculating supply: {0}".format(circulating_supply))
+                logger.error("Failedcirculating supply: {0}: {1}".format(circulating_supply, error))
                 circulating_supply = 0
 
             try:
                 currency = Currency.objects.get(symbol=symbol)
             except ObjectDoesNotExist as error:
-                print("{0} does not exist in our currency list..continuing: error: {1}".format(symbol, error))
+                logger.error("{0} does not exist in our currency list..continuing: error: {1}".format(symbol, error))
                 continue
 
             coins = Coins.Coins(symbol)
@@ -212,7 +208,7 @@ class Command(BaseCommand):
                 coin.save()
 
             else:
-                print("no class for symbol {0}:".format(symbol))
+                logger.error("no class for symbol {0}:".format(symbol))
         return
 
     def getCoinList(self):

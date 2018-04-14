@@ -10,10 +10,9 @@ import logging
 import json
 import calendar
 
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s (%(threadName)-2s) %(message)s',)
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s (%(threadName)-2s) %(message)s',
-                    )
 
 
 class Command(BaseCommand):
@@ -50,7 +49,6 @@ class Command(BaseCommand):
             while end_date < start_date:
                 start_date_ts = calendar.timegm(start_date.timetuple())
                 prices = self.getPrice(xchange_coin['id'], date=start_date.strftime('%Y-%m-%d'))
-                print(prices)
                 if len(prices) != 0:
                     if prices is None:
                         break
@@ -62,7 +60,6 @@ class Command(BaseCommand):
                     coin.save()
                 start_date = start_date - timedelta(days=1)
 
-
     def getCoins(self):
         headers = {'content-type': 'application/json',
                    'user-agent': 'your-own-user-agent/0.0.1'}
@@ -73,6 +70,7 @@ class Command(BaseCommand):
     def getPrice(self, currency_symbol, date):
         try:
             res = self.client.get_spot_price(currency_pair=currency_symbol + '-USD', date=date)
-        except:
-           res = {}
+        except Exception as error:
+            logger.error('{0}'.format(error))
+            res = {}
         return res

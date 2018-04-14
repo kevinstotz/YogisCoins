@@ -15,13 +15,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from DimeCoins.views import Index, CurrencyList, CurrencySearch, CurrencyLineChart, CurrencyDelta
+from DimeCoins.views import CurrencyList, CurrencySearch, CurrencyLineChart, CurrencyDelta, FundPreview
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/currencylist/', CurrencyList.as_view(), name="currencyList"),
-    path('api/currency/delta', CurrencyDelta.as_view(), name="currencyDelta"),
-    path('api/currency/search', CurrencySearch.as_view(), name="currencySearch"),
-    path('api/currency/linechart/<int:pk>/', CurrencyLineChart.as_view(), name="currencyLineChart"),
+    path(r'api/fund/preview/', FundPreview.as_view(), name="fundPreview"),
+    path(r'api/currencylist/', CurrencyList.as_view(), name="currencyList"),
+    path(r'api/currency/delta', CurrencyDelta.as_view(), name="currencyDelta"),
+    path(r'api/currency/search', CurrencySearch.as_view(), name="currencySearch"),
+    path(r'api/currency/linechart/<int:pk>/', CurrencyLineChart.as_view(), name="currencyLineChart"),
 ]
-

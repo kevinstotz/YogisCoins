@@ -191,7 +191,7 @@ class Command(BaseCommand):
                             fund_currency = fund_currency_model()
                             logger.info("Creating currency id:{0}, rebalance Date:{0}".format(top_currency.pk, fund_rebalance_date.pk))
                         self.addCurrency(start_currency, end_currency, fund_currency, fund_rebalance_date, fund, rank, level, market_cap_sum, top_currency)
-                        rank = rank + 1
+                        rank += 1
 
             start_date = fund_rebalance_date.end_date + relativedelta(days=+1)
 

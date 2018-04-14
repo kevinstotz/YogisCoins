@@ -10,9 +10,7 @@ from DimeCoins.classes import Coins
 
 
 logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s (%(threadName)-2s) %(message)s',
-                    )
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s (%(threadName)-2s) %(message)s')
 
 
 class Command(BaseCommand):
@@ -36,7 +34,6 @@ class Command(BaseCommand):
         xchange_coins = self.getCoins()
 
         for xchange_coin in xchange_coins['result']:
-            print(xchange_coin['Currency'])
             coins = Coins.Coins(xchange_coin['Currency'])
             try:
                 currency = Currency.objects.get(symbol=xchange_coin['Currency'])
@@ -51,7 +48,7 @@ class Command(BaseCommand):
                 continue
 
             if prices == {} or prices is None:
-                print(currency.symbol + " No prices found")
+                logger.info(currency.symbol + " No prices found")
                 continue
 
             for price in prices:

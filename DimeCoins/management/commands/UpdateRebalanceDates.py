@@ -9,8 +9,7 @@ import logging
 import datetime
 
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s (%(threadName)-2s) %(message)s',)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s (%(threadName)-2s) %(message)s',)
 logger = logging.getLogger(__name__)
 
 
@@ -84,7 +83,7 @@ class Command(BaseCommand):
             except ObjectDoesNotExist as error:
                 fund_rebalance_date = fundRebalanceDate_model()
                 fund_rebalance_date.start_date = start_date
-                logger.info("Start Date {0} Not Found for fund {1}: Creating".format(start_date, fund.name))
+                logger.info("Start Date {0} Not Found for fund {1}: Creating: {2}".format(start_date, fund.name, error))
 
             if rebalance_period.pk == FUND_PERIOD['DAY']:
                 fund_rebalance_date.end_date = start_date + relativedelta(days=+rebalance_frequency)
@@ -103,5 +102,5 @@ class Command(BaseCommand):
             fund_rebalance_date.fund = fund
             fund_rebalance_date.save(using='DimeAPI')
 
-            print("Created Rebalance Entry")
+            logger.info("Created Rebalance Entry")
             start_date = fund_rebalance_date.end_date + relativedelta(days=+1)

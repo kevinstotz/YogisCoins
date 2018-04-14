@@ -4,13 +4,20 @@ from DimeCoins.models.base import Xchange, Currency
 from DimeCoins.models.coins0 import ADB
 from DimeCoins.classes.Coins import Coins
 from DimeCoins.settings.base import XCHANGE
+from django.core.exceptions import ObjectDoesNotExist
+import logging
+
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s (%(threadName)-2s) %(message)s')
 
 
 class XchangeSerializer(ModelSerializer):
 
     class Meta:
         model = Xchange
-        fields = ('id', 'currency', 'name', 'url', 'api_url', 'api_key', 'api_secret', 'start_date', 'end_date', 'number_symbols')
+        fields = ('id', 'currency', 'name', 'url', 'api_url',
+                  'api_key', 'api_secret', 'start_date', 'end_date', 'number_symbols')
 
 
 class CurrencySerializer(ModelSerializer):
@@ -62,5 +69,35 @@ class CurrencyDeltaSerializer(ModelSerializer):
         fields = ('id', 'delta', 'start_date', 'start_date',)
 
     def get_delta(self, obj: ADB):
-        print(self.context['request'])
         return obj.close
+
+
+class FundPreviewSerializer(ModelSerializer):
+    value = serializers.SerializerMethodField(source='id')
+    name = serializers.SerializerMethodField(source='id')
+
+    class Meta:
+        model = Currency
+        fields = ('value', 'name',)
+
+    def to_value(self, obj):
+        try:
+            currency = Currency.objects.using('coins').get(id=obj)
+        except ObjectDoesNotExist as error:
+            logger.error("{0}".format(error))
+            return
+        except Exception as error:
+            logger.error("{0}".format(error))
+            return
+        return currency.symbol
+
+    def to_name(self, obj):
+        try:
+            currency = Currency.objects.using('coins').get(id=obj)
+        except ObjectDoesNotExist as error:
+            logger.error("{0}".format(error))
+            return
+        except Exception as error:
+            logger.error("{0}".format(error))
+            return
+        return currency.symbol

@@ -10,9 +10,9 @@ import logging
 import requests
 
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s (%(threadName)-2s) %(message)s',
-                    )
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s (%(threadName)-2s) %(message)s',)
+logger = logging.getLogger(__name__)
+
 
 class Command(BaseCommand):
     xchange = Xchange.objects.get(pk=XCHANGE['COIN_API'])
@@ -43,21 +43,18 @@ class Command(BaseCommand):
         for xchange_coin in xchange_coins:
             try:
                 currency = Currency.objects.get(symbol=xchange_coin['asset_id_base'])
-                print(xchange_coin['asset_id_base'] + " exists")
+                logger.info(xchange_coin['asset_id_base'] + " exists")
             except ObjectDoesNotExist as error:
-                print(xchange_coin['asset_id_base'] + " does not exist in our currency list")
+                logger.info(xchange_coin['asset_id_base'] + " does not exist in our currency list")
                 continue
 
             now = datetime.now()
             end_date = now.replace(second=0, minute=0, hour=0)
             start_date = end_date - timedelta(days=2)
             while end_date > start_date:
-
                 prices = self.getPrice(xchange_coin['symbol_id'], start_date=start_date, end_date=end_date)
                 coins = Coins.Coins()
-                print(prices)
                 if len(prices) > 0:
-                    print(prices)
                     for price in prices:
                         coin = coins.get_coin_type(symbol=currency.symbol, time=int(time.mktime(start_date.timetuple())), exchange=self.xchange)
                         coin.time = int(time.mktime(start_date.timetuple()))

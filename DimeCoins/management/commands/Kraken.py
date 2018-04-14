@@ -20,7 +20,7 @@ class Command(BaseCommand):
         try:
             self.kraken = krakenex.API()
         except ObjectDoesNotExist as error:
-            logging.debug('Client does not exist:{0}'.format( error))
+            logging.debug('Client does not exist:{0}'.format(error))
         self.comparison_currency = 'USD'
 
         xchange_coins = self.getCoins()
@@ -51,14 +51,16 @@ class Command(BaseCommand):
     def getPrice(self, currency_symbol):
         try:
             pair = 'X' + currency_symbol + 'Z' + self.comparison_currency
-            res = self.kraken.query_public('OHLC', data= {'pair': pair, 'interval': 1440 })
+            res = self.kraken.query_public('OHLC', data={'pair': pair, 'interval': 1440})
             return res['result'][pair]
-        except:
-           return 0
+        except Exception as error:
+            logger.info("{0}".format(error))
+            return 0
 
     def getCoins(self):
         try:
             res = self.kraken.query_public('Assets')
             return res['result']
-        except:
-           return 0
+        except Exception as error:
+            logger.info("{0}".format(error))
+            return 0

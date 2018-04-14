@@ -100,7 +100,7 @@ class Command(BaseCommand):
                         logger.error("Failed getting Fund Currency ID: {0}:{1}".format(fundCurrency.currency, error))
                         return
 
-                    running_total = running_total + float(fundCurrency.amount) * float(currency_instance.close)
+                    running_total += float(fundCurrency.amount) * float(currency_instance.close)
 
                 try:
                     fundHistory = fundHistory_model.objects.using('DimeAPI').get(time=start_date,

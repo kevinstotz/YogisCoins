@@ -1,16 +1,15 @@
 from DimeCoins.models.base import Xchange, Currency
-from DimeCoins.classes import Coins, SymbolName
+from DimeCoins.classes import Coins
 import requests
 from django.core.management.base import BaseCommand
-from django.core.exceptions import ObjectDoesNotExist
 from DimeCoins.settings.base import XCHANGE
 from datetime import datetime, timedelta
 import logging
 import time
 
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s (%(threadName)-2s) %(message)s',
-                    )
+
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s (%(threadName)-2s) %(message)s',)
+logger = logging.getLogger(__name__)
 
 
 class Command(BaseCommand):
@@ -26,7 +25,7 @@ class Command(BaseCommand):
         prices = self.getPrice(currency.symbol, end_date=start_date, start_date=end_date)
         coins = Coins.Coins()
         if prices == 0 or prices == 'NoneType' or prices == []:
-            print(currency.symbol + "Not found")
+            logger.info(currency.symbol + "Not found")
 
 
         for key in prices['bpi']:
@@ -48,7 +47,6 @@ class Command(BaseCommand):
                   'end': end_date}
 
         spot_price = requests.get(self.xchange.api_url + '/bpi/historical/close.json', params=params, headers=headers)
-        print(spot_price.url)
         if spot_price.status_code == requests.codes.ok:
             return spot_price.json()
         else:

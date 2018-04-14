@@ -47,6 +47,7 @@ from DimeCoins.models.coins2660 import *
 
 
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s (%(threadName)-2s) %(message)s')
 
 
 class Coins:
@@ -70,7 +71,6 @@ class Coins:
         else:
             self.class_name = self.createClassName(self.symbol)
         return self.class_name
-
 
     def getObject(self):
 
@@ -125,51 +125,50 @@ class Coins:
             if idx == 0:
                 if char.isdigit():
                     if int(char) == 1:
-                        new_class_name = new_class_name + 'ONE_'
+                        new_class_name += 'ONE_'
                     elif int(char) == 2:
-                        new_class_name = new_class_name + 'TWO_'
+                        new_class_name += 'TWO_'
                     elif int(char) == 3:
-                        new_class_name = new_class_name + 'THREE_'
+                        new_class_name += 'THREE_'
                     elif int(char) == 4:
-                        new_class_name = new_class_name + 'FOUR_'
+                        new_class_name += 'FOUR_'
                     elif int(char) == 5:
-                        new_class_name = new_class_name + 'FIVE_'
+                        new_class_name += 'FIVE_'
                     elif int(char) == 6:
-                        new_class_name = new_class_name + 'SIX_'
+                        new_class_name += 'SIX_'
                     elif int(char) == 7:
-                        new_class_name = new_class_name + 'SEVEN_'
+                        new_class_name += 'SEVEN_'
                     elif int(char) == 8:
-                        new_class_name = new_class_name + 'EIGHT_'
+                        new_class_name += 'EIGHT_'
                     elif int(char) == 9:
-                        new_class_name = new_class_name + 'NINE_'
+                        new_class_name += 'NINE_'
                     elif int(char) == 0:
-                        new_class_name = new_class_name + 'ZERO_'
+                        new_class_name += 'ZERO_'
                     else:
                         pass
                     continue
 
             if idx == (len(symbol) - 1):
                 if char == '*':
-                    print(char)
-                    new_class_name = new_class_name + '_STAR'
+                    new_class_name += '_STAR'
                 elif char == '$':
-                    new_class_name = new_class_name + 'DOLLAR'
+                    new_class_name += 'DOLLAR'
                 elif char == '@':
-                    new_class_name = new_class_name + '_AT'
+                    new_class_name += '_AT'
                 else:
-                    new_class_name = new_class_name + char.upper()
+                    new_class_name += char.upper()
                 continue
                 
             if char == '*':
-                new_class_name = new_class_name + 'STAR_'
+                new_class_name += 'STAR_'
             elif char == '$':
-                new_class_name = new_class_name + 'DOLLAR_'
+                new_class_name += 'DOLLAR_'
             elif char == '@':
-                new_class_name = new_class_name + 'AT_'
+                new_class_name += 'AT_'
             elif char.isdigit():
-                new_class_name = new_class_name + str(char)
+                new_class_name += str(char)
             elif char.encode('ascii').isalpha():
-                new_class_name = new_class_name + char.upper()
+                new_class_name += char.upper()
             else:
                 logger.error("Char {0} was not converted".format(char))
 
@@ -189,7 +188,7 @@ class Coins:
             call_command('makemigrations', 'DimeCoins')
             call_command('makemigrations', 'DimeCoins')
             call_command('migrate', 'DimeCoins')
-            logger.info("Class Created be sure to migrate: {0}".format(self.class_name))
+            logger.info("Class Created be sure to migrate: {0} {1}".format(self.class_name, error))
             return None
         except Exception as error:
             logger.error("Class Creation Failed Name Error: {0}".format(error))
