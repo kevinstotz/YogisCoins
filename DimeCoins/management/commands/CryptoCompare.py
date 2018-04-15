@@ -37,7 +37,7 @@ class Command(BaseCommand):
 
             now = datetime.now()
             start_date = now.replace(second=0, minute=0, hour=0)
-            end_date = start_date - timedelta(days=1500)
+            end_date = start_date - timedelta(days=300)
 
             while end_date < start_date:
                 start_date_ts = calendar.timegm(start_date.timetuple())

@@ -56,3 +56,15 @@ class NCT(Coin):
 class ODE(Coin):
 	pass
 
+
+class XDCE(Coin):
+	pass
+
+
+class XSN(Coin):
+	pass
+
+
+class WICC(Coin):
+	pass
+

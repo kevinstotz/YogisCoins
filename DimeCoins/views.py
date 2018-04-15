@@ -99,14 +99,14 @@ class FundPreview(generics.ListAPIView):
 
     def post(self, request):
         previewFund = json.loads(request.body.decode("utf-8"))
-        end_date = datetime.utcnow().replace(hour=0, second=0, minute=0)
+        end_date = datetime.utcnow().replace(hour=0, second=0, minute=0, microsecond=0)
         start_date = end_date - timedelta(days=30)
         previewBasket = []
         while start_date < end_date:
             value = 0
-            for currency in previewFund['fundPreview']:
+            for previewCurrency in previewFund['fundPreview']:
                 try:
-                    currency = Currency.objects.get(active=0, pk=currency['currencyId'])
+                    currency = Currency.objects.get(active=0, pk=previewCurrency['currencyId'])
                 except ObjectDoesNotExist as error:
                     logger.error("{0} Does not exist: {1}".format(self.kwargs['pk'], error))
                     return None
@@ -114,9 +114,9 @@ class FundPreview(generics.ListAPIView):
                 coins = Coins.Coins(currency.symbol)
                 xchange = Xchange.objects.get(pk=XCHANGE['COIN_MARKET_CAP'])
                 coin = coins.getRecord(xchange=xchange, time=calendar.timegm(start_date.timetuple()))
-                value = value + (coin.close * 1.0 / len(previewFund['fundPreview']))
+                value += (coin.close * previewCurrency['percent'])
 
             previewBasket.append({"name": start_date.timestamp(), "value": value})
-            start_date = start_date + timedelta(days=1)
+            start_date += timedelta(days=1)
 
         return JsonResponse(previewBasket, safe=False)

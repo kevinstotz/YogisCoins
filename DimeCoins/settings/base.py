@@ -401,5 +401,6 @@ FUND_PERIOD = {
     'WEEK': 2,
     'MONTH': 3,
     'QUARTER': 4,
-    'YEAR': 5
+    'SEMI ANNUAL': 5,
+    'YEAR': 6
 }
